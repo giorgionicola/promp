@@ -12,8 +12,8 @@ def make_block_diag(A, num_blocks):
     assert(n == m and (n % num_blocks)==0)
     block_len = n // num_blocks
     B = np.zeros((n,m))
-    for i in xrange(n):
-        for j in xrange(n):
+    for i in range(n):
+        for j in range(n):
             if (i // block_len) == (j // block_len):
                 B[i,j] = A[i,j]
     return B

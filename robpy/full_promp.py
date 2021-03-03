@@ -44,7 +44,9 @@ def poly(t, params, **args):
     """ Polynomial with order equal to dim-1
     """
     order = args['conf']['order']
-    basis_f = map(lambda ix: t**ix, range(order+1))
+    basis_f = []
+    for ix in range(order + 1):
+        basis_f.append(t ** ix)
     return np.array(basis_f)
 
 def comb_basis(t, params, **args):
@@ -77,9 +79,9 @@ def cov_mat_precomp(cov_mat):
             'log_det': log_det}
 
 def lambda_debug(f, x, name):
-    print "Evaluating {1}({0})".format(x,name)
+    print ("Evaluating {1}({0})".format(x,name))
     ans = f(x)
-    print "Ans=", ans
+    print ("Ans=", ans)
     return ans
 
 def get_bfun_lambdas(basis_params, basis_fun, q=False, qd=False):
@@ -99,7 +101,7 @@ def get_Phi_t(t, T, num_joints=1, pos=None, vel=None, acc=None):
     pos_t = []
     vel_t = []
     acc_t = []
-    for d in xrange(num_joints):
+    for d in range(num_joints):
         if pos is not None: pos_t.append( pos )
         if vel is not None: vel_t.append( vel_fac * vel )
         if acc is not None: acc_t.append( vel_fac**2 * acc )
@@ -126,7 +128,7 @@ def get_Phi(self, times, bfun):
         Tn = len(time)
         duration = time[-1] - time[0]
         Phi_n = []
-        for t in xrange(Tn):
+        for t in range(Tn):
             curr_time = time[t] - time[0]
             phi_nt = self.__comp_Phi_t(curr_time, duration, **bfun)
             Phi_n.append(phi_nt)
@@ -148,9 +150,9 @@ def get_y_t(self, q=None, qd=None, qdd=None):
 def __get_Y(self, times, **args):
     Y = []
     N = len(times)
-    for n in xrange(N):
+    for n in range(N):
         y_n = []
-        for t in xrange(len(times[n])):
+        for t in range(len(times[n])):
             inst = {}
             if 'q' in args:
                 inst['q'] = args['q'][n][t,:]
@@ -166,7 +168,7 @@ class FullProMP:
         args.setdefault('basis_params', self.get_basis_pars())
         args.setdefault('basis_fun', self.basis_fun)
         q = False if 'q' in args and isinstance(args['q'],bool) and not args['q'] else True
-        qd = args['qd'] if 'qd' in args else False
+        qd = True if 'qd' in args else False
         return get_bfun_lambdas(args['basis_params'], args['basis_fun'], q=q, qd=qd)
 
     def __get_bfun_grad_lambdas(self, **args):
@@ -180,7 +182,7 @@ class FullProMP:
         pos_t = []
         vel_t = []
         acc_t = []
-        for d in xrange(self.num_joints):
+        for d in range(self.num_joints):
             if 'pos' in args: pos_t.append( args['pos'] )
             if 'vel' in args: vel_t.append( vel_fac * args['vel'] )
             if 'acc' in args: acc_t.append( vel_fac**2 * args['acc'] )
@@ -211,7 +213,7 @@ class FullProMP:
             Tn = len(time)
             duration = time[-1] - time[0]
             Phi_n = []
-            for t in xrange(Tn):
+            for t in range(Tn):
                 curr_time = time[t] - time[0]
                 phi_nt = self.__comp_Phi_t(curr_time, duration, **bfun)
                 Phi_n.append(phi_nt)
@@ -238,9 +240,9 @@ class FullProMP:
     def __get_Y(self, times, **args):
         Y = []
         N = len(times)
-        for n in xrange(N):
+        for n in range(N):
             y_n = []
-            for t in xrange(len(times[n])):
+            for t in range(len(times[n])):
                 inst = {}
                 if 'q' in args:
                     inst['q'] = args['q'][n][t,:]
@@ -303,11 +305,11 @@ class FullProMP:
         Phi = self.__get_Phi(times, **args)
         #3) Actually compute lower bound
         ans = 0.0
-        for n in xrange(len(times)):
+        for n in range(len(times)):
             Tn = len(times[n])
             lpw = log_det_sig_w + np.trace(np.dot(inv_sig_w,w_covs[n])) + quad(w_means[n]-mu_w, inv_sig_w)
             lhood = 0.0
-            for t in xrange(Tn):
+            for t in range(Tn):
                 phi_nt = Phi[n][t] 
                 y_nt = Y[n][t]
                 lhood = lhood + log_det_sig_y + quad(y_nt-np.dot(phi_nt,w_means[n]),inv_sig_y) + \
@@ -327,15 +329,15 @@ class FullProMP:
         Phi = self.__get_Phi(times, **args)
         pars = args['basis_params']
         #3) Actually compute the gradient
-        for n in xrange(len(times)):
+        for n in range(len(times)):
             Tn = len(times[n])
-            for t in xrange(Tn):
+            for t in range(Tn):
                 #3.1) Compute the derivative of lower-bound w.r.t phi_nt
                 A = np.outer( np.dot(Phi[n][t], w_means[n]), w_means[n] ) + \
                         np.dot(Phi[n][t], w_covs[n]) - np.outer(Y[n][t], w_means[n])
                 d_lb_phi_nt = 2*np.dot(inv_sig_y, A)
                 #3.1) Compute the derivatives of phi_nt w.r.t each parameter
-                for d in xrange(len(pars)):
+                for d in range(len(pars)):
                     pass
 
 
@@ -394,7 +396,7 @@ class FullProMP:
             Tn = len(Y[n])
             sum_mean = np.dot(inv_sig_w, mu_w)
             sum_cov = inv_sig_w
-            for t in xrange(Tn):
+            for t in range(Tn):
                 phi_nt = Phi[n][t]
                 tmp1 = np.dot(np.transpose(phi_nt),inv_sig_y)
                 sum_mean = sum_mean + np.dot(tmp1, Y[n][t])
@@ -446,8 +448,8 @@ class FullProMP:
         #3) Optimize Sigma_y
         diff_y = []
         uncert_w_y = []
-        for n in xrange(N):
-            for t in xrange(len(times[n])):
+        for n in range(N):
+            for t in range(len(times[n])):
                 diff_y.append(Y[n][t] - np.dot(Phi[n][t], w_means[n]))
                 uncert_w_y.append(np.dot(np.dot(Phi[n][t],w_covs[n]),Phi[n][t].T))
         if 'no_Sw' in args and args['no_Sw']==True:
@@ -458,19 +460,19 @@ class FullProMP:
         #4) Update
         self.mu_w = mu_w
         if args['print_inner_lb']:
-            print 'lb(mu_w)=', self.__EM_lowerbound(times, Y, expectations, **args)
+            print ('lb(mu_w)=', self.__EM_lowerbound(times, Y, expectations, **args))
 
         self.Sigma_w = utils.force_sym(Sigma_w)
         if args['joint_indep']: self.Sigma_w = utils.make_block_diag(self.Sigma_w, args['num_joints'])
         if args['print_inner_lb']:
-            print 'lb(Sigma_w)=', self.__EM_lowerbound(times, Y, expectations, **args)
+            print ('lb(Sigma_w)=', self.__EM_lowerbound(times, Y, expectations, **args))
 
         if args['diag_sy']:
             self.Sigma_y = np.diag(np.diag(Sigma_y))
         else:
             self.Sigma_y = utils.force_sym(Sigma_y)
         if args['print_inner_lb']:
-            print 'lb(Sigma_y)=', self.__EM_lowerbound(times, Y, expectations, **args)
+            print( 'lb(Sigma_y)=', self.__EM_lowerbound(times, Y, expectations, **args))
 
         #5) Update optional parameters
         if args['opt_basis_pars']:
@@ -486,9 +488,9 @@ class FullProMP:
             if o_basis_pars.success:
                 self.set_basis_pars(o_basis_pars.x)
             else:
-                print "Warning: The optimization of the basis parameters failed. Message: ", o_basis_pars.message
+                print ("Warning: The optimization of the basis parameters failed. Message: ", o_basis_pars.message)
             if args['print_inner_lb']:
-                print 'lb(basis_params)=', self.__EM_lowerbound(times, Y, expectations, **args)
+                print ('lb(basis_params)=', self.__EM_lowerbound(times, Y, expectations, **args))
 
     def __EM_training(self, times, **args):
         #1) Initialize state before training
@@ -522,17 +524,17 @@ class FullProMP:
 
         likelihoods = []
         #2) Train
-        for it in xrange(args['max_iter']):
+        for it in range(args['max_iter']):
             expectations = self.__E_step(times, Y, **args)
             if ('early_quit' in args and args['early_quit']()): break
             if args['print_lowerbound']: 
                 lh = self.__EM_lowerbound(times, Y, expectations, **args)
-                print 'E-step LB:', lh
+                print( 'E-step LB:', lh)
                 likelihoods.append(lh)
             self.__M_step(times, Y, expectations, **args)
             if ('early_quit' in args and args['early_quit']()): break
             if args['print_lowerbound']: 
-                print 'M-step LB:', self.__EM_lowerbound(times, Y, expectations, **args)
+                print ('M-step LB:', self.__EM_lowerbound(times, Y, expectations, **args))
         return {'likelihoods': likelihoods}
 
     def log_likelihood(self, times, Sigma_w_mle=None, **args):
@@ -556,11 +558,11 @@ class FullProMP:
         elif isinstance(Phi,list) and len(Phi)==0:
             Phi.extend(_Phi)
         ans = []
-        for n in xrange(N):
+        for n in range(N):
             Tn = len(times[n])
             w = W[n]
             curr_sample = []
-            for t in xrange(Tn):
+            for t in range(Tn):
                 y = np.dot(Phi[n][t], w) + np.multiply(np.random.standard_normal(len(noise)), noise)
                 curr_sample.append(y)
             ans.append(np.array(curr_sample))
@@ -581,7 +583,7 @@ class FullProMP:
         ans = {"model": model, "basis": basis, "num_joints": self.num_joints}
         return ans
 
-    def condition(self, t, T, q, Sigma_q=None, ignore_Sy = True):
+    def condition(self, t, T, q, qd=None, Sigma_q=None, ignore_Sy = True):
         """ Conditions the ProMP
 
         Condition the ProMP to pass be at time t with some desired position and velocity. If there is
@@ -590,9 +592,13 @@ class FullProMP:
         """
         times = [[0,t,T]]
         _Phi = self.__get_Phi(times, basis_params=self.get_basis_pars())
+        # print(len(_Phi), len(_Phi[0]), _Phi[0][1].shape)
         phi_t = _Phi[0][1]
         d,lw = phi_t.shape
-        mu_q = self.__get_y_t(q=q)
+        if qd is None:
+            mu_q = self.__get_y_t(q=q)
+        else:
+            mu_q = self.__get_y_t(q=q, qd=qd)
         if ignore_Sy:
             tmp1 = np.dot(self.Sigma_w, phi_t.T)
             tmp2 = np.dot(phi_t, np.dot(self.Sigma_w, phi_t.T))
