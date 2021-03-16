@@ -1,6 +1,6 @@
 Probabilistic Movement Primitive Library
 ========================================
-
+-
 A Probabilistic Movement Primitive (ProMP) is a probabilistic generative model used to model movement, it is typically
 used in the robotics community to learn movements from a human demonstrator (or teacher) and replicate those
 movements in a robotic platform.
